@@ -3,8 +3,8 @@
   --bg-2: #10253f;
   --panel: rgba(10, 21, 38, 0.82);
   --panel-border: rgb(0, 0, 0);
-  --text-main: hwb(0 100% 0%);
-  --text-soft: hsl(0, 12%, 91%);
+  --text-main: hwb(0 82% 18%);
+  --text-soft: hsl(0, 0%, 100%);
   --accent: #38bdf8;
   --accent-2: #22c55e;
   --warning: #f97316;
