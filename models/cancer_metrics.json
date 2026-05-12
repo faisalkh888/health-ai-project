@@ -1,0 +1,61 @@
+{
+  "disease": "cancer",
+  "accuracy": 0.9386,
+  "roc_auc": 0.9904,
+  "confusion_matrix": [
+    [
+      40,
+      2
+    ],
+    [
+      5,
+      67
+    ]
+  ],
+  "test_size": 114,
+  "features": [
+    "mean radius",
+    "mean texture",
+    "mean perimeter",
+    "mean area",
+    "mean smoothness",
+    "worst concavity"
+  ],
+  "feature_schema": [
+    {
+      "name": "mean radius",
+      "kind": "number",
+      "label": "mean radius"
+    },
+    {
+      "name": "mean texture",
+      "kind": "number",
+      "label": "mean texture"
+    },
+    {
+      "name": "mean perimeter",
+      "kind": "number",
+      "label": "mean perimeter"
+    },
+    {
+      "name": "mean area",
+      "kind": "number",
+      "label": "mean area"
+    },
+    {
+      "name": "mean smoothness",
+      "kind": "number",
+      "label": "mean smoothness"
+    },
+    {
+      "name": "worst concavity",
+      "kind": "number",
+      "label": "worst concavity"
+    }
+  ],
+  "best_params": {
+    "learning_rate": 0.05,
+    "max_depth": 5,
+    "n_estimators": 180
+  }
+}

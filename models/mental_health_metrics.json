@@ -1,0 +1,94 @@
+{
+  "disease": "mental_health",
+  "accuracy": 0.8095,
+  "roc_auc": 0.7857,
+  "confusion_matrix": [
+    [
+      12,
+      2
+    ],
+    [
+      2,
+      5
+    ]
+  ],
+  "test_size": 21,
+  "features": [
+    "Choose your gender",
+    "Age",
+    "Your current year of Study",
+    "What is your CGPA?",
+    "Marital status",
+    "Do you have Anxiety?",
+    "Do you have Panic attack?",
+    "Did you seek any specialist for a treatment?"
+  ],
+  "feature_schema": [
+    {
+      "name": "Choose your gender",
+      "kind": "select",
+      "label": "Choose your gender",
+      "options": [
+        "Female",
+        "Male"
+      ]
+    },
+    {
+      "name": "Age",
+      "kind": "number",
+      "label": "Age"
+    },
+    {
+      "name": "Your current year of Study",
+      "kind": "select",
+      "label": "Your current year of Study",
+      "options": [
+        "Year 1",
+        "Year 2",
+        "Year 3",
+        "year 1",
+        "year 2",
+        "year 3",
+        "year 4"
+      ]
+    },
+    {
+      "name": "What is your CGPA?",
+      "kind": "select",
+      "label": "What is your CGPA?",
+      "options": [
+        "0 - 1.99",
+        "2.00 - 2.49",
+        "2.50 - 2.99",
+        "3.00 - 3.49",
+        "3.50 - 4.00",
+        "3.50 - 4.00 "
+      ]
+    },
+    {
+      "name": "Marital status",
+      "kind": "number",
+      "label": "Marital status"
+    },
+    {
+      "name": "Do you have Anxiety?",
+      "kind": "number",
+      "label": "Do you have Anxiety?"
+    },
+    {
+      "name": "Do you have Panic attack?",
+      "kind": "number",
+      "label": "Do you have Panic attack?"
+    },
+    {
+      "name": "Did you seek any specialist for a treatment?",
+      "kind": "number",
+      "label": "Did you seek any specialist for a treatment?"
+    }
+  ],
+  "best_params": {
+    "learning_rate": 0.05,
+    "max_depth": 3,
+    "n_estimators": 120
+  }
+}

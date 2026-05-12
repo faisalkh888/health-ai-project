@@ -1,0 +1,77 @@
+{
+  "disease": "liver",
+  "accuracy": 0.6923,
+  "roc_auc": 0.769,
+  "confusion_matrix": [
+    [
+      22,
+      12
+    ],
+    [
+      24,
+      59
+    ]
+  ],
+  "test_size": 117,
+  "features": [
+    "age",
+    "gender",
+    "total_bilirubin",
+    "alkphos",
+    "sgpt",
+    "sgot",
+    "albumin",
+    "a_g_ratio"
+  ],
+  "feature_schema": [
+    {
+      "name": "age",
+      "kind": "number",
+      "label": "age"
+    },
+    {
+      "name": "gender",
+      "kind": "select",
+      "label": "gender",
+      "options": [
+        "Female",
+        "Male"
+      ]
+    },
+    {
+      "name": "total_bilirubin",
+      "kind": "number",
+      "label": "total_bilirubin"
+    },
+    {
+      "name": "alkphos",
+      "kind": "number",
+      "label": "alkphos"
+    },
+    {
+      "name": "sgpt",
+      "kind": "number",
+      "label": "sgpt"
+    },
+    {
+      "name": "sgot",
+      "kind": "number",
+      "label": "sgot"
+    },
+    {
+      "name": "albumin",
+      "kind": "number",
+      "label": "albumin"
+    },
+    {
+      "name": "a_g_ratio",
+      "kind": "number",
+      "label": "a_g_ratio"
+    }
+  ],
+  "best_params": {
+    "learning_rate": 0.05,
+    "max_depth": 3,
+    "n_estimators": 180
+  }
+}

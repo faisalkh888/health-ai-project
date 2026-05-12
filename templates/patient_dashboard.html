@@ -1,0 +1,214 @@
+{% extends "base.html" %}
+{% block content %}
+
+<section class="hero-panel">
+  <div>
+    <span class="eyebrow">Patient Workspace</span>
+    <h2>Patient Dashboard</h2>
+    <p>Track your prediction trends, upload reports, and book a doctor consultation from one responsive dashboard.</p>
+  </div>
+  <div class="hero-pill">AI chatbot, appointments, analytics, and PDF report support</div>
+</section>
+
+{% with messages = get_flashed_messages() %}
+  {% if messages %}
+    <div class="alert alert-warning soft-alert">{{ messages[0] }}</div>
+  {% endif %}
+{% endwith %}
+
+<section class="stats-grid">
+  <article class="metric-card">
+    <span>Total Predictions</span>
+    <strong>{{ analytics.total_predictions }}</strong>
+  </article>
+  <article class="metric-card">
+    <span>High Risk Flags</span>
+    <strong>{{ analytics.high_risk_cases }}</strong>
+  </article>
+  <article class="metric-card">
+    <span>Booked Appointments</span>
+    <strong>{{ analytics.active_appointments }}</strong>
+  </article>
+</section>
+
+<section class="dashboard-grid" id="analytics-root" data-analytics='{{ analytics|tojson }}'>
+  <div class="panel-card">
+    <div class="section-heading">
+      <div>
+        <span class="eyebrow">Prediction Center</span>
+        <h3>Run disease screening</h3>
+      </div>
+    </div>
+
+    <div class="d-flex gap-2 mb-3 flex-wrap">
+      {% for disease in disease_forms %}
+      <button
+        type="button"
+        class="btn {% if loop.first %}btn-primary{% else %}btn-outline-primary{% endif %} disease-tab"
+        data-disease="{{ disease.key }}"
+      >{{ disease.label }}</button>
+      {% endfor %}
+    </div>
+
+    <form id="prediction-form">
+      <input type="hidden" id="disease" value="{{ disease_forms[0].key if disease_forms else 'diabetes' }}">
+
+      {% for disease in disease_forms %}
+      <div id="{{ disease.key }}-fields" class="row {% if not loop.first %}d-none{% endif %}">
+        {% for feature in disease.fields %}
+        <div class="col-md-4 mb-3">
+          <label class="form-label">{{ feature.label }}</label>
+          {% if feature.kind == "select" %}
+          <select class="form-select feature-input" data-disease="{{ disease.key }}" required>
+            <option value="">Select {{ feature.label }}</option>
+            {% for option in feature.options %}
+            <option value="{{ option }}">{{ option }}</option>
+            {% endfor %}
+          </select>
+          {% else %}
+          <input
+            type="number"
+            step="any"
+            class="form-control feature-input"
+            data-disease="{{ disease.key }}"
+            placeholder="{{ feature.placeholder or feature.label }}"
+            required
+          >
+          {% endif %}
+        </div>
+        {% endfor %}
+      </div>
+      {% endfor %}
+
+      <div class="d-flex gap-2 flex-wrap">
+        <button type="submit" class="btn btn-success">Predict Risk</button>
+      </div>
+    </form>
+
+    <hr class="section-divider">
+
+    <form id="upload-form" enctype="multipart/form-data">
+      <label class="form-label">Upload CSV, Excel, PDF, TXT, PNG, or JPG report values</label>
+      <div class="d-flex gap-2 flex-wrap">
+        <input id="upload-file" name="file" type="file" class="form-control" accept=".csv,.xlsx,.xls,.pdf,.txt,.png,.jpg,.jpeg" required>
+        <button type="submit" class="btn btn-outline-success">Upload and Predict</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="panel-card">
+    <div class="section-heading">
+      <div>
+        <span class="eyebrow">Appointment System</span>
+        <h3>Book a consultation</h3>
+      </div>
+    </div>
+
+    <form method="POST" action="/appointments/book" class="row g-3">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <div class="col-md-6">
+        <label class="form-label">Doctor Name</label>
+        <input name="doctor_name" class="form-control" placeholder="Dr. Meera Sharma" required>
+      </div>
+      <div class="col-md-6">
+        <label class="form-label">Specialty</label>
+        <input name="specialty" class="form-control" placeholder="Cardiology" required>
+      </div>
+      <div class="col-md-6">
+        <label class="form-label">Date</label>
+        <input type="date" name="appointment_date" class="form-control" required>
+      </div>
+      <div class="col-md-6">
+        <label class="form-label">Time Slot</label>
+        <input type="time" name="time_slot" class="form-control" required>
+      </div>
+      <div class="col-md-6">
+        <label class="form-label">Consultation Mode</label>
+        <select name="mode" class="form-select">
+          <option value="Video">Video</option>
+          <option value="In Person">In Person</option>
+          <option value="Phone">Phone</option>
+        </select>
+      </div>
+      <div class="col-12">
+        <label class="form-label">Notes</label>
+        <textarea name="notes" class="form-control" rows="3" placeholder="Symptoms, report questions, or follow-up goals"></textarea>
+      </div>
+      <div class="col-12">
+        <button class="btn btn-primary">Book Appointment</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="panel-card">
+    <div class="section-heading">
+      <div>
+        <span class="eyebrow">Real-Time Dashboard</span>
+        <h3>Prediction analytics</h3>
+      </div>
+    </div>
+    <canvas id="diseaseChart" height="180"></canvas>
+    <canvas id="riskChart" height="180" class="mt-4"></canvas>
+    <canvas id="trendChart" height="180" class="mt-4"></canvas>
+  </div>
+
+  <div class="panel-card">
+    <div class="section-heading">
+      <div>
+        <span class="eyebrow">Patient History</span>
+        <h3>Recent prediction history</h3>
+      </div>
+    </div>
+    <div class="table-responsive">
+      <table class="table table-dark table-hover align-middle history-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Disease</th>
+            <th>Probability</th>
+            <th>Confidence</th>
+            <th>Risk</th>
+            <th>Created</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in history %}
+          <tr>
+            <td>{{ item.id }}</td>
+            <td>{{ item.disease.title() }}</td>
+            <td>{{ "%.2f"|format(item.probability * 100) }}%</td>
+            <td>{{ "%.2f"|format((item.confidence or 0) * 100) }}%</td>
+            <td><span class="risk-chip risk-{{ item.risk|lower }}">{{ item.risk }}</span></td>
+            <td>{{ item.created_at }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="panel-card panel-wide">
+    <div class="section-heading">
+      <div>
+        <span class="eyebrow">Care Follow-Up</span>
+        <h3>Upcoming appointments</h3>
+      </div>
+    </div>
+    <div class="appointment-grid">
+      {% for item in analytics.appointments %}
+      <article class="appointment-card">
+        <span>{{ item.specialty }}</span>
+        <h4>{{ item.doctor_name }}</h4>
+        <p>{{ item.appointment_date }} at {{ item.time_slot }}</p>
+        <small>{{ item.mode }} consultation | {{ item.status }}</small>
+      </article>
+      {% else %}
+      <p class="muted-copy">No appointments booked yet. Use the booking form to add your first consultation.</p>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<script src="{{ url_for('static', filename='js/app.js') }}"></script>
+
+{% endblock %}

@@ -1,0 +1,84 @@
+{
+  "disease": "stroke",
+  "accuracy": 0.7485,
+  "roc_auc": 0.8514,
+  "confusion_matrix": [
+    [
+      724,
+      248
+    ],
+    [
+      9,
+      41
+    ]
+  ],
+  "test_size": 1022,
+  "features": [
+    "gender",
+    "age",
+    "hypertension",
+    "heart_disease",
+    "ever_married",
+    "avg_glucose_level",
+    "bmi",
+    "smoking_status"
+  ],
+  "feature_schema": [
+    {
+      "name": "gender",
+      "kind": "select",
+      "label": "gender",
+      "options": [
+        "Female",
+        "Male",
+        "Other"
+      ]
+    },
+    {
+      "name": "age",
+      "kind": "number",
+      "label": "age"
+    },
+    {
+      "name": "hypertension",
+      "kind": "number",
+      "label": "hypertension"
+    },
+    {
+      "name": "heart_disease",
+      "kind": "number",
+      "label": "heart_disease"
+    },
+    {
+      "name": "ever_married",
+      "kind": "number",
+      "label": "ever_married"
+    },
+    {
+      "name": "avg_glucose_level",
+      "kind": "number",
+      "label": "avg_glucose_level"
+    },
+    {
+      "name": "bmi",
+      "kind": "number",
+      "label": "bmi"
+    },
+    {
+      "name": "smoking_status",
+      "kind": "select",
+      "label": "smoking_status",
+      "options": [
+        "Unknown",
+        "formerly smoked",
+        "never smoked",
+        "smokes"
+      ]
+    }
+  ],
+  "best_params": {
+    "learning_rate": 0.05,
+    "max_depth": 3,
+    "n_estimators": 120
+  }
+}

@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h2>Batch Results</h2>
+
+<table class="table">
+  <thead>
+    <tr><th>ID</th><th>Disease</th><th>Probability</th><th>Confidence</th><th>Risk</th><th>Report</th></tr>
+  </thead>
+  <tbody id="batch-results"></tbody>
+</table>
+
+<script src="/static/js/app.js"></script>
+
+{% endblock %}

@@ -1,0 +1,61 @@
+{
+  "disease": "heart",
+  "accuracy": 0.7869,
+  "roc_auc": 0.8203,
+  "confusion_matrix": [
+    [
+      20,
+      8
+    ],
+    [
+      5,
+      28
+    ]
+  ],
+  "test_size": 61,
+  "features": [
+    "age",
+    "sex",
+    "cp",
+    "trestbps",
+    "chol",
+    "thalach"
+  ],
+  "feature_schema": [
+    {
+      "name": "age",
+      "kind": "number",
+      "label": "age"
+    },
+    {
+      "name": "sex",
+      "kind": "number",
+      "label": "sex"
+    },
+    {
+      "name": "cp",
+      "kind": "number",
+      "label": "cp"
+    },
+    {
+      "name": "trestbps",
+      "kind": "number",
+      "label": "trestbps"
+    },
+    {
+      "name": "chol",
+      "kind": "number",
+      "label": "chol"
+    },
+    {
+      "name": "thalach",
+      "kind": "number",
+      "label": "thalach"
+    }
+  ],
+  "best_params": {
+    "learning_rate": 0.05,
+    "max_depth": 3,
+    "n_estimators": 120
+  }
+}

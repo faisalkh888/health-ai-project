@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Health AI</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <meta name="csrf-token" content="{{ csrf_token() }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div>
+        <div class="sidebar-top">
+          <div class="brand-mark">HA</div>
+          <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Toggle dark and light mode">
+            <span id="theme-icon">&#9728;</span>
+          </button>
+        </div>
+        <h1>Health AI</h1>
+        <p>Predictive screening, patient support, and clinical workflow in one place.</p>
+      </div>
+
+      <nav class="nav-stack">
+        <a href="/">Home</a>
+        {% if current_user.is_authenticated %}
+          <a href="/patient/dashboard">Patient Dashboard</a>
+          <a href="/chatbot">AI Chatbot</a>
+          <a href="/grievance">Support</a>
+          <a href="/account/password">Change Password</a>
+          {% if current_user.role == "admin" %}
+            <a href="/admin/dashboard">Admin Dashboard</a>
+            <a href="/admin/grievances">Grievances</a>
+            <a href="/admin/users">Manage Users</a>
+          {% else %}
+            <a href="/admin/login">Admin Sign In</a>
+          {% endif %}
+          <a href="/logout">Logout</a>
+        {% else %}
+          <a href="/patient/login">Patient Sign In</a>
+          <a href="/admin/login">Admin Sign In</a>
+          <a href="/register">Create Account</a>
+        {% endif %}
+      </nav>
+    </aside>
+
+    <main class="content">
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+</body>
+</html>

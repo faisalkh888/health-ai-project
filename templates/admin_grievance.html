@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h3>Grievances</h3>
+
+<table class="table">
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>User</th>
+      <th>Message</th>
+      <th>Status</th>
+      <th>Response</th>
+      <th>Created</th>
+      <th>Action</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for grievance in grievances %}
+    <tr>
+      <td>{{ grievance.id }}</td>
+      <td>{{ grievance.email or "Unknown" }}</td>
+      <td>{{ grievance.message }}</td>
+      <td>{{ grievance.status }}</td>
+      <td>{{ grievance.response or "" }}</td>
+      <td>{{ grievance.created_at }}</td>
+      <td>
+        <form method="POST" action="/admin/grievances/{{ grievance.id }}" class="d-flex gap-2">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <select name="status" class="form-select">
+            <option value="Pending" {% if grievance.status == "Pending" %}selected{% endif %}>Pending</option>
+            <option value="In Progress" {% if grievance.status == "In Progress" %}selected{% endif %}>In Progress</option>
+            <option value="Resolved" {% if grievance.status == "Resolved" %}selected{% endif %}>Resolved</option>
+          </select>
+          <input name="response" class="form-control" value="{{ grievance.response or '' }}" placeholder="Response">
+          <button class="btn btn-primary">Save</button>
+        </form>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+{% endblock %}

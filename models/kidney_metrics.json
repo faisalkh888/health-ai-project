@@ -1,0 +1,73 @@
+{
+  "disease": "kidney",
+  "accuracy": 1.0,
+  "roc_auc": 1.0,
+  "confusion_matrix": [
+    [
+      30,
+      0
+    ],
+    [
+      0,
+      50
+    ]
+  ],
+  "test_size": 80,
+  "features": [
+    "age",
+    "bp",
+    "sg",
+    "al",
+    "sc",
+    "hemo",
+    "htn",
+    "dm"
+  ],
+  "feature_schema": [
+    {
+      "name": "age",
+      "kind": "number",
+      "label": "age"
+    },
+    {
+      "name": "bp",
+      "kind": "number",
+      "label": "bp"
+    },
+    {
+      "name": "sg",
+      "kind": "number",
+      "label": "sg"
+    },
+    {
+      "name": "al",
+      "kind": "number",
+      "label": "al"
+    },
+    {
+      "name": "sc",
+      "kind": "number",
+      "label": "sc"
+    },
+    {
+      "name": "hemo",
+      "kind": "number",
+      "label": "hemo"
+    },
+    {
+      "name": "htn",
+      "kind": "number",
+      "label": "htn"
+    },
+    {
+      "name": "dm",
+      "kind": "number",
+      "label": "dm"
+    }
+  ],
+  "best_params": {
+    "learning_rate": 0.05,
+    "max_depth": 3,
+    "n_estimators": 120
+  }
+}

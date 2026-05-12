@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h2>Dashboard</h2>
+
+{% with messages = get_flashed_messages() %}
+  {% if messages %}
+    <div class="alert alert-warning">{{ messages[0] }}</div>
+  {% endif %}
+{% endwith %}
+
+<div class="card p-4 mb-4">
+  <div class="d-flex gap-2 mb-3">
+    <button type="button" class="btn btn-primary disease-tab" data-disease="diabetes">Diabetes</button>
+    <button type="button" class="btn btn-outline-primary disease-tab" data-disease="heart">Heart</button>
+  </div>
+
+  <form id="prediction-form">
+    <input type="hidden" id="disease" value="diabetes">
+
+    <div id="diabetes-fields" class="row">
+      {% for feature in diabetes_features %}
+      <div class="col-md-3 mb-2">
+        <label class="form-label">{{ feature }}</label>
+        <input class="form-control feature-input" data-disease="diabetes" placeholder="{{ feature }}" required>
+      </div>
+      {% endfor %}
+    </div>
+
+    <div id="heart-fields" class="row d-none">
+      {% for feature in heart_features %}
+      <div class="col-md-2 mb-2">
+        <label class="form-label">{{ feature }}</label>
+        <input class="form-control feature-input" data-disease="heart" placeholder="{{ feature }}" required>
+      </div>
+      {% endfor %}
+    </div>
+
+    <button type="submit" class="btn btn-success mt-3">Predict</button>
+  </form>
+
+  <hr>
+
+  <form id="upload-form" enctype="multipart/form-data">
+    <label class="form-label">Upload CSV/Excel file with the selected disease columns</label>
+    <div class="d-flex gap-2">
+      <input id="upload-file" name="file" type="file" class="form-control" accept=".csv,.xlsx,.xls" required>
+      <button type="submit" class="btn btn-outline-success">Upload Predict</button>
+    </div>
+  </form>
+</div>
+
+<div class="card p-3">
+  <h4>Your Recent History</h4>
+  <table class="table">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Disease</th>
+        <th>Probability</th>
+        <th>Confidence</th>
+        <th>Risk</th>
+        <th>Created</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in history %}
+      <tr>
+        <td>{{ item.id }}</td>
+        <td>{{ item.disease.title() }}</td>
+        <td>{{ "%.2f"|format(item.probability * 100) }}%</td>
+        <td>{{ "%.2f"|format((item.confidence or 0) * 100) }}%</td>
+        <td>{{ item.risk }}</td>
+        <td>{{ item.created_at }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<script src="/static/js/app.js"></script>
+
+{% endblock %}

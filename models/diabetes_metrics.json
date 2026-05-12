@@ -1,0 +1,49 @@
+{
+  "disease": "diabetes",
+  "accuracy": 0.7532,
+  "roc_auc": 0.8267,
+  "confusion_matrix": [
+    [
+      75,
+      25
+    ],
+    [
+      13,
+      41
+    ]
+  ],
+  "test_size": 154,
+  "features": [
+    "Glucose",
+    "BMI",
+    "Age",
+    "BloodPressure"
+  ],
+  "feature_schema": [
+    {
+      "name": "Glucose",
+      "kind": "number",
+      "label": "Glucose"
+    },
+    {
+      "name": "BMI",
+      "kind": "number",
+      "label": "BMI"
+    },
+    {
+      "name": "Age",
+      "kind": "number",
+      "label": "Age"
+    },
+    {
+      "name": "BloodPressure",
+      "kind": "number",
+      "label": "BloodPressure"
+    }
+  ],
+  "best_params": {
+    "learning_rate": 0.05,
+    "max_depth": 3,
+    "n_estimators": 120
+  }
+}

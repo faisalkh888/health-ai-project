@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+{% block content %}
+
+<section class="hero-panel">
+  <div>
+    <span class="eyebrow">Admin Console</span>
+    <h2>Operational overview for users, predictions, and model review</h2>
+    <p>Monitor system activity, review AI predictions, and retrain models when your datasets improve.</p>
+  </div>
+  <div class="hero-pill">Production-ready admin workflow</div>
+</section>
+
+<section class="stats-grid">
+  <article class="metric-card">
+    <span>Total Users</span>
+    <strong>{{ total_users }}</strong>
+  </article>
+  <article class="metric-card">
+    <span>Total Predictions</span>
+    <strong>{{ total_predictions }}</strong>
+  </article>
+  <article class="metric-card">
+    <span>Total Grievances</span>
+    <strong>{{ total_grievances }}</strong>
+  </article>
+</section>
+
+<section class="dashboard-grid">
+  <div class="panel-card">
+    <div class="section-heading">
+      <div>
+        <span class="eyebrow">Model Monitoring</span>
+        <h3>Metrics snapshot</h3>
+      </div>
+      <button id="retrain" class="btn btn-warning">Retrain Models</button>
+    </div>
+    <div class="table-responsive">
+      <table class="table table-dark table-hover align-middle history-table">
+        <thead>
+          <tr>
+            <th>Disease</th>
+            <th>Accuracy</th>
+            <th>ROC AUC</th>
+            <th>Test Size</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for disease, metric in metrics.items() %}
+          <tr>
+            <td>{{ disease.title() }}</td>
+            {% if metric %}
+            <td>{{ metric.accuracy }}</td>
+            <td>{{ metric.roc_auc }}</td>
+            <td>{{ metric.test_size }}</td>
+            {% else %}
+            <td colspan="3">Run retraining to generate metrics.</td>
+            {% endif %}
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="panel-card" id="admin-metrics-root" data-metrics='{{ metrics|tojson }}'>
+    <div class="section-heading">
+      <div>
+        <span class="eyebrow">Visual Analytics</span>
+        <h3>Accuracy and ROC AUC</h3>
+      </div>
+    </div>
+    <canvas id="accuracyChart" height="170"></canvas>
+    <canvas id="rocChart" height="170" class="mt-4"></canvas>
+  </div>
+
+  <div class="panel-card panel-wide">
+    <div class="section-heading">
+      <div>
+        <span class="eyebrow">Clinical Review Queue</span>
+        <h3>Recent predictions</h3>
+      </div>
+    </div>
+    <div class="table-responsive">
+      <table class="table table-dark table-hover align-middle history-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>User</th>
+            <th>Disease</th>
+            <th>Probability</th>
+            <th>Confidence</th>
+            <th>Risk</th>
+            <th>Clinical Review</th>
+            <th>Model</th>
+            <th>Created</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for prediction in predictions %}
+          <tr>
+            <td>{{ prediction.id }}</td>
+            <td>{{ prediction.email or "Guest" }}</td>
+            <td>{{ prediction.disease.title() }}</td>
+            <td>{{ "%.2f"|format(prediction.probability * 100) }}%</td>
+            <td>{{ "%.2f"|format((prediction.confidence or 0) * 100) }}%</td>
+            <td><span class="risk-chip risk-{{ prediction.risk|lower }}">{{ prediction.risk }}</span></td>
+            <td>
+              <form method="POST" action="/admin/predictions/{{ prediction.id }}/validate">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <select name="clinical_status" class="form-select mb-2">
+                  {% for status in ["Pending Review", "Reviewed", "Confirmed", "Rejected"] %}
+                  <option value="{{ status }}" {% if prediction.clinical_status == status %}selected{% endif %}>{{ status }}</option>
+                  {% endfor %}
+                </select>
+                <input name="final_diagnosis" class="form-control mb-2" placeholder="Final diagnosis" value="{{ prediction.final_diagnosis or '' }}">
+                <input name="clinical_notes" class="form-control mb-2" placeholder="Clinical notes">
+                <select name="actual_result" class="form-select mb-2">
+                  <option value="">Unknown</option>
+                  <option value="0">Negative</option>
+                  <option value="1">Positive</option>
+                </select>
+                <button class="btn btn-sm btn-primary">Save</button>
+              </form>
+            </td>
+            <td>{{ prediction.model_version or "unknown" }}</td>
+            <td>{{ prediction.created_at }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<script src="{{ url_for('static', filename='js/app.js') }}"></script>
+
+{% endblock %}

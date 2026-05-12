@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block content %}
+
+<section class="hero-panel">
+  <div>
+    <span class="eyebrow">AI Medical Chatbot</span>
+    <h2>Interactive symptom support with conversation memory</h2>
+    <p>Ask about symptoms, health reports, lifestyle changes, or next steps after a prediction. Voice input is supported in compatible browsers.</p>
+  </div>
+  <div class="hero-pill">Gemini-ready with safe fallback support</div>
+</section>
+
+<section class="chat-layout">
+  <div class="panel-card">
+    <div class="section-heading">
+      <div>
+        <span class="eyebrow">Conversation</span>
+        <h3>Health guidance assistant</h3>
+      </div>
+    </div>
+    <div id="chat-box" class="chat-box">
+      {% for item in chat_history %}
+      <div class="chat-bubble {{ 'bot' if item.role == 'assistant' else 'user' }}">
+        <strong>{{ 'Health AI' if item.role == 'assistant' else 'You' }}</strong>
+        <p>{{ item.message }}</p>
+      </div>
+      {% endfor %}
+    </div>
+    <div class="chat-controls">
+      <input id="msg" class="form-control" placeholder="Describe symptoms, ask about a report, or type start for symptom check...">
+      <button id="mic-btn" type="button" class="btn btn-outline-light">Voice</button>
+      <button id="send-btn" type="button" class="btn btn-primary">Send</button>
+    </div>
+    <p class="muted-copy mt-3">This chatbot provides AI screening support and education, not a confirmed medical diagnosis.</p>
+  </div>
+</section>
+
+<script src="{{ url_for('static', filename='js/app.js') }}"></script>
+
+{% endblock %}

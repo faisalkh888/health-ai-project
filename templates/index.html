@@ -1,0 +1,19 @@
+<!-- templates/index.html -->
+{% extends "base.html" %}
+{% block content %}
+
+<section class="hero-panel">
+  <div>
+    <span class="eyebrow">Health Screening Platform</span>
+    <h1>AI Health Risk Prediction System</h1>
+    <p>Run screening for diabetes, heart disease, breast cancer, kidney disease, liver disease, stroke, and mental health risk from one platform.</p>
+    <div class="d-flex gap-2 flex-wrap mt-3">
+      <a href="/patient/login" class="btn btn-primary">Patient Sign In</a>
+      <a href="/admin/login" class="btn btn-warning">Admin Sign In</a>
+      <a href="/register" class="btn btn-success">Register</a>
+    </div>
+  </div>
+  <div class="hero-pill">7 prediction modules, AI chatbot, reports, and appointments</div>
+</section>
+
+{% endblock %}
