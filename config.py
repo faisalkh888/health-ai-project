@@ -1,10 +1,15 @@
 import os
 
+from dotenv import load_dotenv
+
+load_dotenv(os.path.join(os.path.abspath(os.path.dirname(__file__)), ".env"))
+
 SECRET_KEY = os.environ.get("SECRET_KEY", "dev-secret-key-change-before-production")
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 DATABASE = os.path.join(BASE_DIR, "database.db")
 DATABASE_URL = os.environ.get("DATABASE_URL", f"sqlite:///{DATABASE}")
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
+GEMINI_MODEL = os.environ.get("GEMINI_MODEL", "gemini-2.0-flash")
 CHAT_MEMORY_LIMIT = int(os.environ.get("CHAT_MEMORY_LIMIT", "12"))
 
 USE_CONSOLE_EMAIL = os.environ.get("USE_CONSOLE_EMAIL", "true").lower() == "true"

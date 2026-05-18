@@ -116,7 +116,7 @@
       </div>
       <div class="col-md-6">
         <label class="form-label">Date</label>
-        <input type="date" name="appointment_date" class="form-control" required>
+        <input type="date" name="appointment_date" class="form-control" min="{{ now().strftime('%Y-%m-%d') }}" required>
       </div>
       <div class="col-md-6">
         <label class="form-label">Time Slot</label>

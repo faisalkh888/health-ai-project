@@ -1,5 +1,6 @@
 import sqlite3
 import struct
+from datetime import datetime, timedelta
 from io import BytesIO
 
 import pytest
@@ -204,3 +205,89 @@ def test_pdf_upload_prediction(client, monkeypatch):
 
     assert response.status_code == 200
     assert response.get_json()["disease"] == "diabetes"
+
+
+def test_past_appointment_booking_is_rejected(client):
+    login(client, 1)
+    past_time = datetime.now() - timedelta(days=1)
+    with client.session_transaction() as session:
+        session["_csrf_token"] = "token"
+
+    response = client.post(
+        "/appointments/book",
+        data={
+            "csrf_token": "token",
+            "doctor_name": "Dr. Past",
+            "specialty": "Cardiology",
+            "appointment_date": past_time.strftime("%Y-%m-%d"),
+            "time_slot": past_time.strftime("%H:%M"),
+            "mode": "Video",
+            "notes": "",
+        },
+    )
+
+    assert response.status_code == 302
+
+    conn = sqlite3.connect(health_app.DATABASE)
+    row = conn.execute("SELECT COUNT(*) FROM appointments").fetchone()
+    conn.close()
+    assert row[0] == 0
+
+
+def test_patient_dashboard_removes_expired_appointments(client):
+    login(client, 1)
+    conn = sqlite3.connect(health_app.DATABASE)
+    expired_time = datetime.now() - timedelta(hours=2)
+    future_time = datetime.now() + timedelta(hours=2)
+    conn.execute(
+        """
+        INSERT INTO appointments (user_id, doctor_name, specialty, appointment_date, time_slot, mode, notes)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+        """,
+        (1, "Dr. Old", "General", expired_time.strftime("%Y-%m-%d"), expired_time.strftime("%H:%M"), "Video", ""),
+    )
+    conn.execute(
+        """
+        INSERT INTO appointments (user_id, doctor_name, specialty, appointment_date, time_slot, mode, notes)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+        """,
+        (1, "Dr. New", "General", future_time.strftime("%Y-%m-%d"), future_time.strftime("%H:%M"), "Video", ""),
+    )
+    conn.commit()
+    conn.close()
+
+    response = client.get("/patient/dashboard")
+    assert response.status_code == 200
+    assert b"Dr. Old" not in response.data
+    assert b"Dr. New" in response.data
+
+
+def test_clear_chat_endpoint_removes_saved_messages(client):
+    login(client, 1)
+    with client.session_transaction() as session:
+        session["_csrf_token"] = "token"
+        session["chat_state"] = {"mode": "ai"}
+
+    conn = sqlite3.connect(health_app.DATABASE)
+    conn.execute(
+        "INSERT INTO chat_messages (user_id, role, message, source) VALUES (?, ?, ?, ?)",
+        (1, "user", "Hello", "ui"),
+    )
+    conn.execute(
+        "INSERT INTO chat_messages (user_id, role, message, source) VALUES (?, ?, ?, ?)",
+        (1, "assistant", "Hi", "gemini"),
+    )
+    conn.commit()
+    conn.close()
+
+    response = client.post("/api/chat/clear", data={"csrf_token": "token"})
+    assert response.status_code == 200
+    assert response.get_json()["message"] == "Chat cleared."
+
+    conn = sqlite3.connect(health_app.DATABASE)
+    count = conn.execute("SELECT COUNT(*) FROM chat_messages WHERE user_id = 1").fetchone()[0]
+    conn.close()
+    assert count == 0
+
+    with client.session_transaction() as session:
+        assert "chat_state" not in session

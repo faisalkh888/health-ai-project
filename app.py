@@ -7,6 +7,7 @@ import struct
 import subprocess
 import sys
 import uuid
+from datetime import datetime
 from io import BytesIO
 from functools import wraps
 
@@ -53,6 +54,7 @@ def csrf_token():
 
 
 app.jinja_env.globals["csrf_token"] = csrf_token
+app.jinja_env.globals["now"] = datetime.now
 
 
 @app.before_request
@@ -410,7 +412,48 @@ def save_chat_message(user_id, role, message, source="ui"):
     conn.close()
 
 
+def clear_chat_history(user_id):
+    conn = get_db()
+    execute(conn, "DELETE FROM chat_messages WHERE user_id=?", (user_id,))
+    conn.commit()
+    conn.close()
+
+
+def _appointment_datetime(appointment_date, time_slot):
+    try:
+        return datetime.strptime(f"{appointment_date} {time_slot}", "%Y-%m-%d %H:%M")
+    except ValueError:
+        return None
+
+
+def purge_expired_appointments(user_id=None):
+    conn = get_db()
+    params = ()
+    sql = """
+        SELECT id, appointment_date, time_slot
+        FROM appointments
+    """
+    if user_id is not None:
+        sql += " WHERE user_id=?"
+        params = (user_id,)
+    rows = fetchall(execute(conn, sql, params))
+    now = datetime.now()
+    expired_ids = []
+    for row in rows:
+        appointment_at = _appointment_datetime(row["appointment_date"], row["time_slot"])
+        if appointment_at and appointment_at < now:
+            expired_ids.append(row["id"])
+
+    if expired_ids:
+        placeholders = ",".join("?" for _ in expired_ids)
+        execute(conn, f"DELETE FROM appointments WHERE id IN ({placeholders})", tuple(expired_ids))
+        conn.commit()
+    conn.close()
+    return len(expired_ids)
+
+
 def get_patient_analytics(user_id):
+    purge_expired_appointments(user_id)
     conn = get_db()
     predictions = fetchall(
         execute(
@@ -477,6 +520,7 @@ def dashboard():
 @app.route("/patient/dashboard")
 @login_required
 def patient_dashboard():
+    purge_expired_appointments(current_user.id)
     conn = get_db()
     history = fetchall(
         execute(
@@ -746,6 +790,14 @@ def book_appointment():
         flash("Doctor, specialty, date, and time slot are required.")
         return redirect(url_for("patient_dashboard"))
 
+    appointment_at = _appointment_datetime(appointment_date, time_slot)
+    if not appointment_at:
+        flash("Enter a valid appointment date and time.")
+        return redirect(url_for("patient_dashboard"))
+    if appointment_at <= datetime.now():
+        flash("Choose a future appointment slot.")
+        return redirect(url_for("patient_dashboard"))
+
     conn = get_db()
     execute(
         conn,
@@ -780,6 +832,14 @@ def chat():
     save_chat_message(current_user.id, "user", message, source="ui")
     save_chat_message(current_user.id, "assistant", result["reply"], source=result.get("source", "ui"))
     return jsonify({"reply": result["reply"], "done": result["done"], "source": result.get("source")})
+
+
+@app.route("/api/chat/clear", methods=["POST"])
+@login_required
+def clear_chat():
+    clear_chat_history(current_user.id)
+    session.pop("chat_state", None)
+    return jsonify({"message": "Chat cleared."})
 
 
 @app.route("/api/predict/diabetes", methods=["POST"])

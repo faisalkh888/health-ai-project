@@ -11,7 +11,12 @@ function appendMessage(container, label, message, cssClass = "bot") {
   }
   const item = document.createElement("div");
   item.className = `chat-bubble ${cssClass}`;
-  item.innerHTML = `<strong>${label}</strong><p>${message}</p>`;
+  const title = document.createElement("strong");
+  title.textContent = label;
+  const body = document.createElement("p");
+  body.textContent = message;
+  item.appendChild(title);
+  item.appendChild(body);
   container.appendChild(item);
 }
 
@@ -399,6 +404,16 @@ document.addEventListener("DOMContentLoaded", () => {
   const chatBox = document.getElementById("chat-box");
   const msgInput = document.getElementById("msg");
   const sendBtn = document.getElementById("send-btn");
+  const clearChatBtn = document.getElementById("clear-chat-btn");
+
+  if (chatBox && !chatBox.children.length) {
+    appendMessage(
+      chatBox,
+      "Health AI",
+      "Hello. I can help with symptom questions, report summaries, healthy habits, and next steps after a prediction.",
+      "bot"
+    );
+  }
 
   async function sendChatMessage() {
     if (!msgInput || !msgInput.value.trim()) {
@@ -407,15 +422,28 @@ document.addEventListener("DOMContentLoaded", () => {
     const message = msgInput.value.trim();
     appendMessage(chatBox, "You", message, "user");
     msgInput.value = "";
+    if (sendBtn) {
+      sendBtn.disabled = true;
+      sendBtn.textContent = "Sending...";
+    }
 
-    const response = await fetch("/api/chat", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "X-CSRFToken": csrfToken },
-      body: JSON.stringify({ message }),
-    });
-    const data = await response.json();
-    appendMessage(chatBox, "Health AI", data.reply || "I could not respond.", "bot");
-    chatBox.scrollTop = chatBox.scrollHeight;
+    try {
+      const response = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "X-CSRFToken": csrfToken },
+        body: JSON.stringify({ message }),
+      });
+      const data = await response.json();
+      appendMessage(chatBox, "Health AI", data.reply || data.error || "I could not respond.", "bot");
+    } catch (_error) {
+      appendMessage(chatBox, "Health AI", "The chatbot is unavailable right now. Please try again.", "bot");
+    } finally {
+      if (sendBtn) {
+        sendBtn.disabled = false;
+        sendBtn.textContent = "Send";
+      }
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
   }
 
   if (sendBtn) {
@@ -427,6 +455,29 @@ document.addEventListener("DOMContentLoaded", () => {
       if (event.key === "Enter") {
         event.preventDefault();
         await sendChatMessage();
+      }
+    });
+  }
+
+  if (clearChatBtn) {
+    clearChatBtn.addEventListener("click", async () => {
+      clearChatBtn.disabled = true;
+      try {
+        await fetch("/api/chat/clear", {
+          method: "POST",
+          headers: { "X-CSRFToken": csrfToken },
+        });
+        if (chatBox) {
+          chatBox.innerHTML = "";
+          appendMessage(
+            chatBox,
+            "Health AI",
+            "Chat cleared. Start a new symptom check or ask a health question any time.",
+            "bot"
+          );
+        }
+      } finally {
+        clearChatBtn.disabled = false;
       }
     });
   }

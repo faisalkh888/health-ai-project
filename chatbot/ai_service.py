@@ -1,8 +1,7 @@
 import json
-import os
 from urllib import error, request
 
-from config import GEMINI_API_KEY
+from config import GEMINI_API_KEY, GEMINI_MODEL
 
 
 SYSTEM_PROMPT = (
@@ -20,10 +19,12 @@ def gemini_enabled():
 
 
 def build_contents(history, message):
-    contents = [{"role": "user", "parts": [{"text": SYSTEM_PROMPT}]}]
+    contents = []
     for item in history[-8:]:
         role = "model" if item.get("role") == "assistant" else "user"
-        contents.append({"role": role, "parts": [{"text": item.get("message", "")}]})
+        text = (item.get("message") or "").strip()
+        if text:
+            contents.append({"role": role, "parts": [{"text": text}]})
     contents.append({"role": "user", "parts": [{"text": message}]})
     return contents
 
@@ -34,10 +35,12 @@ def ask_gemini(message, history):
 
     endpoint = (
         "https://generativelanguage.googleapis.com/v1beta/models/"
-        "gemini-1.5-flash:generateContent?key="
-        f"{GEMINI_API_KEY}"
+        f"{GEMINI_MODEL}:generateContent"
     )
     payload = json.dumps({
+        "system_instruction": {
+            "parts": [{"text": SYSTEM_PROMPT}],
+        },
         "contents": build_contents(history, message),
         "generationConfig": {
             "temperature": 0.3,
@@ -48,14 +51,17 @@ def ask_gemini(message, history):
     req = request.Request(
         endpoint,
         data=payload,
-        headers={"Content-Type": "application/json"},
+        headers={
+            "Content-Type": "application/json",
+            "X-goog-api-key": GEMINI_API_KEY,
+        },
         method="POST",
     )
 
     try:
         with request.urlopen(req, timeout=20) as response:
             data = json.loads(response.read().decode("utf-8"))
-    except (error.URLError, TimeoutError, json.JSONDecodeError):
+    except (error.HTTPError, error.URLError, TimeoutError, json.JSONDecodeError):
         return None
 
     candidates = data.get("candidates") or []
